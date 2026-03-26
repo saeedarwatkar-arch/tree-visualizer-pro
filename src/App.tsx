@@ -59,15 +59,21 @@ function App() {
 
   // Search Engine State
   const [searchPath, setSearchPath] = useState<string[]>([]);
+  const [searchPath2, setSearchPath2] = useState<string[]>([]);
   const [targetNodeId, setTargetNodeId] = useState<string | null>(null);
+  const [targetNodeId2, setTargetNodeId2] = useState<string | null>(null);
   const [searchStatus, setSearchStatus] = useState<'searching' | 'found' | 'not-found' | null>(null);
+  const [searchStatus2, setSearchStatus2] = useState<'searching' | 'found' | 'not-found' | null>(null);
   const searchIntervalRef = useRef<number | null>(null);
 
   const resetSearchState = () => {
      if (searchIntervalRef.current) clearInterval(searchIntervalRef.current);
      setSearchPath([]);
+     setSearchPath2([]);
      setTargetNodeId(null);
+     setTargetNodeId2(null);
      setSearchStatus(null);
+     setSearchStatus2(null);
   };
 
   const syncRender = () => {
@@ -108,38 +114,60 @@ function App() {
      resetSearchState();
      setViewMode('visualizer');
      setSearchStatus('searching');
+     if (isCompare) setSearchStatus2('searching');
 
-     const result = tree1.search(val);
-     // Note: we are currently searching tree1. If Compare Mode is on, 
-     // we'd probably want a separate path array for tree2, but for simplicity we'll focus visual tracking on Tree 1.
+     const result1 = tree1.search(val);
+     const result2 = (isCompare && tree2.search) ? tree2.search(val) : null;
      
-     const fullPath = result.path || [];
+     const fullPath1 = result1.path || [];
+     const fullPath2 = result2?.path || [];
      
      let i = 0;
-     setSearchPath([]); // strict init
+     setSearchPath([]); 
+     if (isCompare) setSearchPath2([]);
      
-     if (fullPath.length === 0) {
-        setSearchStatus('not-found');
+     const maxLen = Math.max(fullPath1.length, fullPath2.length);
+
+     if (maxLen === 0) {
+        setSearchStatus(result1.found ? 'found' : 'not-found');
+        if (isCompare) setSearchStatus2(result2?.found ? 'found' : 'not-found');
         return;
      }
 
      searchIntervalRef.current = window.setInterval(() => {
-        setSearchPath(prev => [...prev, fullPath[i]]);
-        
-        if (i === fullPath.length - 1) {
-           if (searchIntervalRef.current) clearInterval(searchIntervalRef.current);
-           setTargetNodeId(result.found ? fullPath[i] : fullPath[i]);
-           setSearchStatus(result.found ? 'found' : 'not-found');
+        if (i < fullPath1.length) {
+           setSearchPath(prev => [...prev, fullPath1[i]]);
            
-           // Structural self-adjusting trees change their roots dynamically upon search.
-           if (treeType1 === 'splay') {
-              setRoot1(tree1.root ? { ...tree1.root } : null);
+           if (i === fullPath1.length - 1) {
+              setTargetNodeId(fullPath1[i]);
+              setSearchStatus(result1.found ? 'found' : 'not-found');
+              
+              if (treeType1 === 'splay') {
+                 setRoot1(tree1.root ? { ...tree1.root } : null);
+              }
            }
+        }
+        
+        if (isCompare && i < fullPath2.length) {
+           setSearchPath2(prev => [...prev, fullPath2[i]]);
+           
+           if (i === fullPath2.length - 1) {
+              setTargetNodeId2(fullPath2[i]);
+              setSearchStatus2(result2!.found ? 'found' : 'not-found');
+              
+              if (treeType2 === 'splay') {
+                 setRoot2(tree2.root ? { ...tree2.root } : null);
+              }
+           }
+        }
+
+        if (i >= maxLen - 1) {
+           if (searchIntervalRef.current) clearInterval(searchIntervalRef.current);
         }
         i++;
      }, 400);
 
-  }, [inputValue, tree1, treeType1]);
+  }, [inputValue, tree1, treeType1, isCompare, tree2, treeType2]);
 
   const handleClear = useCallback(() => {
     setTree1(createTree(treeType1));
@@ -264,16 +292,19 @@ function App() {
         );
      }
 
-     // Use search highlight path strictly for Primary tree. 
-     // Doing both requires maintaining dual-pathing which is out-of-scope for simple comparative demo visualization logic.
      const applySearch = isPrimary ? {
         searchPath, targetNodeId, searchStatus
-     } : {};
+     } : {
+        searchPath: searchPath2, targetNodeId: targetNodeId2, searchStatus: searchStatus2
+     };
 
      let heapTargetIdx = null;
-     if (isPrimary && searchStatus && treeInst.array) {
+     const currentSearchStatus = isPrimary ? searchStatus : searchStatus2;
+     if (currentSearchStatus && treeInst.array) {
         heapTargetIdx = treeInst.array.indexOf(parseInt(inputValue));
      }
+
+     const currentSearchPath = isPrimary ? searchPath : searchPath2;
 
      return (
        <div className="flex-1 flex flex-col min-h-0 min-w-0">
@@ -291,15 +322,15 @@ function App() {
           {(type === 'minheap' || type === 'maxheap') && treeInst && (
              <ArrayView 
                 array={treeInst.array || []} 
-                searchPathIds={isPrimary ? searchPath.map(id => {
+                searchPathIds={currentSearchPath.map(id => {
                    // Map Canvas IDs back to values for array highlighting
                    for (const [val, sid] of treeInst.nodeIds.entries()) {
                       if (sid === id) return String(val);
                    }
                    return "";
-                }) : []} 
-                targetIdx={isPrimary ? heapTargetIdx : null}
-                searchStatus={isPrimary ? searchStatus : null}
+                })} 
+                targetIdx={heapTargetIdx}
+                searchStatus={currentSearchStatus}
              />
           )}
        </div>
