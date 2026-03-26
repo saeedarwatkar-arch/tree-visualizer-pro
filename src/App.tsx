@@ -11,7 +11,7 @@ import { SplayTree } from './lib/structures/SplayTree';
 import { Heap } from './lib/structures/Heap';
 import { HuffmanBuilder, HuffmanNode } from './lib/structures/HuffmanTree';
 
-import { Play, Trash2, ArrowRightLeft, SplitSquareHorizontal, Search, BookOpen } from 'lucide-react';
+import { Play, Trash2, ArrowRightLeft, SplitSquareHorizontal, Search, BookOpen, Menu, X } from 'lucide-react';
 
 type TreeMode = 'bst' | 'avl' | 'binary' | 'splay' | 'minheap' | 'maxheap' | 'huffman';
 type ViewMode = 'theory' | 'visualizer';
@@ -40,6 +40,7 @@ const typeLabels: Record<TreeMode, string> = {
 
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('theory');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [treeType1, setTreeType1] = useState<TreeMode>('bst');
   const [treeType2, setTreeType2] = useState<TreeMode>('avl');
   
@@ -307,7 +308,7 @@ function App() {
      const currentSearchPath = isPrimary ? searchPath : searchPath2;
 
      return (
-       <div className="flex-1 flex flex-col min-h-0 min-w-0">
+       <div className="flex-1 flex flex-col min-h-[400px] lg:min-h-0 min-w-0">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-lg font-medium tracking-tight flex items-center gap-2">
                {titleStr}
@@ -323,7 +324,6 @@ function App() {
              <ArrayView 
                 array={treeInst.array || []} 
                 searchPathIds={currentSearchPath.map(id => {
-                   // Map Canvas IDs back to values for array highlighting
                    for (const [val, sid] of treeInst.nodeIds.entries()) {
                       if (sid === id) return String(val);
                    }
@@ -339,22 +339,46 @@ function App() {
 
   return (
     <div className="flex h-screen w-full bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans overflow-hidden">
+      
+      {/* Mobile Overlay */}
+      {isSidebarOpen && (
+        <div 
+           className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 lg:hidden"
+           onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Controls */}
-      <div className="w-80 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col shadow-lg z-20">
-        <div className="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+      <div className={`fixed inset-y-0 left-0 w-80 transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:relative lg:translate-x-0 transition duration-200 ease-in-out border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col shadow-lg z-40`}>
+        <div className="p-4 lg:p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
           <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">
             Tree Explorer
           </h1>
+          <div className="flex items-center gap-2">
+             <button 
+                onClick={() => { setViewMode(viewMode === 'theory' ? 'visualizer' : 'theory'); setIsSidebarOpen(false); }}
+                className="lg:hidden text-slate-500 hover:text-indigo-600 transition-colors p-2"
+                title={`Switch to ${viewMode === 'theory' ? 'Visualizer' : 'Theory'}`}
+             >
+                <BookOpen size={20} />
+             </button>
+             <button 
+                onClick={() => setIsSidebarOpen(false)}
+                className="lg:hidden text-slate-500 hover:text-red-600 transition-colors p-2 bg-slate-100 dark:bg-slate-800 rounded-md"
+             >
+                <X size={20} />
+             </button>
+          </div>
           <button 
              onClick={() => setViewMode(viewMode === 'theory' ? 'visualizer' : 'theory')}
-             className="text-slate-500 hover:text-indigo-600 transition-colors"
+             className="hidden lg:block text-slate-500 hover:text-indigo-600 transition-colors"
              title={`Switch to ${viewMode === 'theory' ? 'Visualizer' : 'Theory'}`}
           >
              <BookOpen size={20} />
           </button>
         </div>
         
-        <div className="p-6 flex-1 overflow-y-auto space-y-6">
+        <div className="p-4 lg:p-6 flex-1 overflow-y-auto space-y-6">
           <div className="flex items-center justify-between">
              <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">Compare Mode</h2>
              <button 
@@ -363,7 +387,7 @@ function App() {
                    setIsCompare(!isCompare);
                    if (viewMode === 'theory') setViewMode('visualizer');
                 }}
-                className={`p-2 rounded-md border ${isCompare ? 'bg-indigo-100 border-indigo-300 text-indigo-700 dark:bg-indigo-900 dark:border-indigo-700 dark:text-indigo-300' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700'}`}
+                className={`p-3 lg:p-2 rounded-md border min-h-[44px] flex items-center justify-center ${isCompare ? 'bg-indigo-100 border-indigo-300 text-indigo-700 dark:bg-indigo-900 dark:border-indigo-700 dark:text-indigo-300' : 'bg-slate-50 border-slate-200 text-slate-500 hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700'}`}
              >
                 <SplitSquareHorizontal size={18} />
              </button>
@@ -374,7 +398,7 @@ function App() {
             <select 
                value={treeType1} 
                onChange={(e) => handleSwitchType1(e.target.value as TreeMode)}
-               className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-md text-sm cursor-pointer"
+               className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 lg:p-2 rounded-md text-sm cursor-pointer min-h-[44px]"
             >
                {Object.entries(typeLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
@@ -386,7 +410,7 @@ function App() {
                <select 
                   value={treeType2} 
                   onChange={(e) => handleSwitchType2(e.target.value as TreeMode)}
-                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-2 rounded-md text-sm cursor-pointer"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 lg:p-2 rounded-md text-sm cursor-pointer min-h-[44px]"
                >
                   {Object.entries(typeLabels).filter(([k]) => k !== 'huffman').map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                </select>
@@ -404,11 +428,11 @@ function App() {
                        value={huffmanText}
                        onChange={(e) => setHuffmanText(e.target.value)}
                        placeholder="Enter string" 
-                       className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                       className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-3 lg:py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px]"
                      />
                      <button 
                        type="submit"
-                       className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md text-sm font-medium"
+                       className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 lg:py-2 rounded-md text-sm font-medium min-h-[44px]"
                      >
                        <Play size={16} /> Build & Animate
                      </button>
@@ -420,12 +444,12 @@ function App() {
                          value={inputValue}
                          onChange={(e) => setInputValue(e.target.value.replace(/[^01]/g, ''))}
                          placeholder="e.g. 010" 
-                         className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-500"
+                         className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-3 lg:py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 min-h-[44px]"
                       />
                       <button 
                          type="button"
                          onClick={handleHuffmanSearch}
-                         className="w-full flex items-center justify-center gap-2 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 py-2 rounded-md text-sm font-medium transition-colors border border-amber-200 dark:border-amber-800"
+                         className="w-full flex items-center justify-center gap-2 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 py-3 lg:py-2 rounded-md text-sm font-medium transition-colors border border-amber-200 dark:border-amber-800 min-h-[44px]"
                          disabled={!inputValue || huffSteps.length === 0}
                       >
                          <Search size={16} /> Decode Path
@@ -440,14 +464,14 @@ function App() {
                      value={inputValue}
                      onChange={(e) => setInputValue(e.target.value)}
                      placeholder="Enter value" 
-                     className="flex-1 w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium"
+                     className="flex-1 w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-3 py-3 lg:py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all font-medium min-h-[44px]"
                    />
                  </div>
                  <div className="flex space-x-2">
                    <button 
                      type="button"
                      onClick={handleInsert}
-                     className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md text-sm font-medium transition-colors"
+                     className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white py-3 lg:py-2 rounded-md text-sm font-medium transition-colors min-h-[44px]"
                      disabled={!inputValue}
                    >
                      <Play size={16} /> Insert
@@ -455,7 +479,7 @@ function App() {
                    <button 
                      type="button"
                      onClick={handleDelete}
-                     className="flex-1 flex items-center justify-center gap-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 py-2 rounded-md text-sm font-medium transition-colors"
+                     className="flex-1 flex items-center justify-center gap-2 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 py-3 lg:py-2 rounded-md text-sm font-medium transition-colors min-h-[44px]"
                      disabled={!inputValue}
                    >
                      <Trash2 size={16} /> Delete
@@ -464,7 +488,7 @@ function App() {
                  <button 
                    type="button"
                    onClick={handleSearch}
-                   className="w-full flex items-center justify-center gap-2 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 py-2 rounded-md text-sm font-medium transition-colors border border-amber-200 dark:border-amber-800 mt-2"
+                   className="w-full flex items-center justify-center gap-2 bg-amber-100 hover:bg-amber-200 dark:bg-amber-900/40 dark:hover:bg-amber-900/60 text-amber-700 dark:text-amber-300 py-3 lg:py-2 rounded-md text-sm font-medium transition-colors border border-amber-200 dark:border-amber-800 mt-2 min-h-[44px]"
                    disabled={!inputValue}
                  >
                    <Search size={16} /> Find & Animate
@@ -478,7 +502,7 @@ function App() {
                 <button 
                    type="button"
                    onClick={handleRandomize}
-                   className="w-full flex items-center justify-center gap-2 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 py-2 rounded-md text-sm font-medium transition-colors border border-purple-200 dark:border-purple-800"
+                   className="w-full flex items-center justify-center gap-2 bg-purple-100 hover:bg-purple-200 dark:bg-purple-900/40 dark:hover:bg-purple-900/60 text-purple-700 dark:text-purple-300 py-3 lg:py-2 rounded-md text-sm font-medium transition-colors border border-purple-200 dark:border-purple-800 min-h-[44px]"
                  >
                    <ArrowRightLeft size={16} /> Randomize Sequence
                  </button>
@@ -489,7 +513,7 @@ function App() {
             <button 
                type="button"
                onClick={handleClear}
-               className="w-full flex items-center justify-center gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 py-2 rounded-md text-sm font-medium transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-900/50"
+               className="w-full flex items-center justify-center gap-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 py-3 lg:py-2 rounded-md text-sm font-medium transition-colors border border-transparent hover:border-red-200 dark:hover:border-red-900/50 min-h-[44px]"
              >
                <Trash2 size={16} /> Clear Canvas
              </button>
@@ -497,23 +521,45 @@ function App() {
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className={`flex-1 flex flex-col md:flex-row gap-6 ${isCompare ? 'overflow-auto' : 'overflow-hidden'}`}>
-        {viewMode === 'theory' ? (
-           <TheoryPage 
-              treeType={treeType1} 
-              onLaunchVisualizer={() => setViewMode('visualizer')} 
-           />
-        ) : (
-           <div className="flex-1 w-full h-full p-6 flex flex-col md:flex-row gap-6">
-              {renderTreeArea(treeType1, tree1, root1, typeLabels[treeType1], true)}
-              
-              {isCompare && treeType1 !== 'huffman' && (
-                 renderTreeArea(treeType2, tree2, root2, typeLabels[treeType2], false)
-              )}
-           </div>
-        )}
+      {/* Main Layout Group: Header + Content */}
+      <div className={`flex-1 flex flex-col min-w-0 h-full`}>
+         
+         {/* Mobile Top Header */}
+         <div className="lg:hidden flex items-center justify-between p-4 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 z-10 shrink-0 shadow-sm">
+            <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">
+               Tree Explorer
+            </h1>
+            <div className="flex items-center gap-3">
+               <button 
+                  onClick={() => setIsSidebarOpen(true)}
+                  className="flex items-center gap-2 p-2 px-3 border border-slate-200 dark:border-slate-700 bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-300 rounded-lg shadow-sm active:bg-slate-100 dark:active:bg-slate-700 transition"
+                  aria-label="Open Menu"
+               >
+                  <Menu size={20} />
+                  <span className="text-sm font-semibold">Menu</span>
+               </button>
+            </div>
+         </div>
+
+         {/* Scrollable Visualizer / Theory Area */}
+         <div className={`flex-1 flex flex-col ${isCompare ? 'overflow-auto' : 'overflow-hidden'}`}>
+            {viewMode === 'theory' ? (
+               <TheoryPage 
+                  treeType={treeType1} 
+                  onLaunchVisualizer={() => setViewMode('visualizer')} 
+               />
+            ) : (
+               <div className="flex-1 w-full h-full p-4 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6">
+                  {renderTreeArea(treeType1, tree1, root1, typeLabels[treeType1], true)}
+                  
+                  {isCompare && treeType1 !== 'huffman' && (
+                     renderTreeArea(treeType2, tree2, root2, typeLabels[treeType2], false)
+                  )}
+               </div>
+            )}
+         </div>
       </div>
+
     </div>
   );
 }

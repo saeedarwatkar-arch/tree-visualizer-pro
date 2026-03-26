@@ -44,18 +44,27 @@ export const TreeCanvas: React.FC<TreeCanvasProps> = ({
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
 
   useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        setDimensions({
-          width: containerRef.current.clientWidth,
-          height: containerRef.current.clientHeight
-        });
+    if (!containerRef.current) return;
+
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+           setDimensions({
+             width: entry.contentRect.width,
+             height: entry.contentRect.height
+           });
+        }
       }
-    };
-    
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
+    });
+
+    observer.observe(containerRef.current);
+
+    setDimensions({
+       width: containerRef.current.clientWidth,
+       height: containerRef.current.clientHeight
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   const { nodes, links } = useMemo(() => {

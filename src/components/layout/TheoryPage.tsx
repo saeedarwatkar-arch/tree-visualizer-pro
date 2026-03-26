@@ -67,18 +67,20 @@ export const TheoryPage: React.FC<TheoryPageProps> = ({ treeType, onLaunchVisual
                       <Clock className="w-5 h-5 text-emerald-500" /> Time Complexity
                    </h2>
                    
-                   <div className="space-y-4">
-                      <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-                         <span className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Access</span>
-                         <span className="font-mono text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded">{data.complexity.access}</span>
-                      </div>
-                      <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-                         <span className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Insert</span>
-                         <span className="font-mono text-sky-600 dark:text-sky-400 font-medium bg-sky-50 dark:bg-sky-900/20 px-2 py-1 rounded">{data.complexity.insert}</span>
-                      </div>
-                      <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
-                         <span className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Delete</span>
-                         <span className="font-mono text-rose-600 dark:text-rose-400 font-medium bg-rose-50 dark:bg-rose-900/20 px-2 py-1 rounded">{data.complexity.delete}</span>
+                   <div className="space-y-4 overflow-x-auto pb-2 -mx-2 px-2">
+                      <div className="min-w-[200px]">
+                         <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800">
+                            <span className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Access</span>
+                            <span className="font-mono text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-900/20 px-2 py-1 rounded whitespace-nowrap ml-4">{data.complexity.access}</span>
+                         </div>
+                         <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800 pt-3">
+                            <span className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Insert</span>
+                            <span className="font-mono text-sky-600 dark:text-sky-400 font-medium bg-sky-50 dark:bg-sky-900/20 px-2 py-1 rounded whitespace-nowrap ml-4">{data.complexity.insert}</span>
+                         </div>
+                         <div className="flex justify-between items-center pb-3 border-b border-slate-100 dark:border-slate-800 pt-3">
+                            <span className="text-sm font-semibold text-slate-500 uppercase tracking-widest">Delete</span>
+                            <span className="font-mono text-rose-600 dark:text-rose-400 font-medium bg-rose-50 dark:bg-rose-900/20 px-2 py-1 rounded whitespace-nowrap ml-4">{data.complexity.delete}</span>
+                         </div>
                       </div>
                    </div>
 
@@ -94,9 +96,11 @@ export const TheoryPage: React.FC<TheoryPageProps> = ({ treeType, onLaunchVisual
                    <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
                       <HardDrive className="w-5 h-5 text-amber-500" /> Space Complexity
                    </h2>
-                   <div className="flex justify-between items-center">
-                         <span className="text-sm font-bold text-slate-500">Memory Bounds</span>
-                         <span className="font-mono text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded">{data.complexity.space}</span>
+                   <div className="overflow-x-auto pb-2 -mx-2 px-2">
+                       <div className="flex justify-between items-center min-w-[200px]">
+                             <span className="text-sm font-bold text-slate-500">Memory Bounds</span>
+                             <span className="font-mono text-amber-600 dark:text-amber-400 font-medium bg-amber-50 dark:bg-amber-900/20 px-2 py-1 rounded whitespace-nowrap ml-4">{data.complexity.space}</span>
+                       </div>
                    </div>
                 </section>
              </div>
